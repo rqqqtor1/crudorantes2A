@@ -15,8 +15,8 @@ class ClaseConexion {
             val contra = "desarrollo"
 
 
-            val connection = DriverManager.getConnection(url, user, contra)
-                return connection
+            val Connection = DriverManager.getConnection(url, user, contra)
+                return Connection
         }
         catch (e: Exception){
             println("Este es el error: $e")
