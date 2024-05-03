@@ -1,5 +1,6 @@
 package fernando.orantes.crudorantes2a
 
+import RecyclerViewHelper.Adaptador
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -7,10 +8,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import modelo.ClaseConexion
+import modelo.DataClassProductos
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +53,34 @@ class MainActivity : AppCompatActivity() {
          }
         }
 
+        ////////////////////////Mostrar////////////////////
+        val rcvProductos = findViewById<RecyclerView>(R.id.rcvProductos)
 
+        //asignar um loyout
+        rcvProductos.layoutManager = LinearLayoutManager(this)
+
+
+        //Funcion para obtener datos
+        fun obetenerDatos(): List<DataClassProductos>{
+            val objConexion = ClaseConexion().cadenaConexion()
+
+            val statment = objConexion?.createStatement()
+            val resulset = statment?.executeQuery( "select * from tbProductos")!!
+            val productos = mutableListOf<DataClassProductos>()
+            while (resulset.next()){
+                val nombre = resulset.getString("nombreProducto")
+                val producto = DataClassProductos(nombre)
+                productos.add(producto)
+            }
+            return productos
+
+        }
+            CoroutineScope(Dispatchers.IO).launch {
+            val productosDB = obetenerDatos()
+                withContext(Dispatchers.Main){
+                    val miAdapter = Adaptador(productosDB)
+                    rcvProductos.adapter = miAdapter
+                }
+        }
     }
 }
